@@ -33,6 +33,13 @@ public class ClientService {
         return new ClientDTO(repository.save(entity));
     }
 
+    @Transactional
+    public ClientDTO update(Long id, ClientDTO dto) {
+        Client entity = repository.getReferenceById(id);
+        passDtoToEntity(dto, entity);
+        return new ClientDTO(repository.save(entity));
+    }
+
     private void passDtoToEntity(ClientDTO dto, Client entity) {
         entity.setName(dto.getName());
         entity.setCpf(dto.getCpf());
