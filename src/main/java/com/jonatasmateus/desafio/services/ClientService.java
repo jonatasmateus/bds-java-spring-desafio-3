@@ -3,10 +3,13 @@ package com.jonatasmateus.desafio.services;
 import com.jonatasmateus.desafio.dto.ClientDTO;
 import com.jonatasmateus.desafio.entities.Client;
 import com.jonatasmateus.desafio.repositories.ClientRepository;
+import com.jonatasmateus.desafio.services.exceptions.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -17,7 +20,8 @@ public class ClientService {
 
     @Transactional(readOnly = true)
     public ClientDTO findById(Long id) {
-        return new ClientDTO(repository.findById(id).get());
+        return new ClientDTO(repository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Recurso não encontrado")));
     }
 
     @Transactional(readOnly = true)
@@ -35,14 +39,24 @@ public class ClientService {
 
     @Transactional
     public ClientDTO update(Long id, ClientDTO dto) {
-        Client entity = repository.getReferenceById(id);
-        passDtoToEntity(dto, entity);
-        return new ClientDTO(repository.save(entity));
+        try {
+            Client entity = repository.getReferenceById(id);
+            passDtoToEntity(dto, entity);
+            return new ClientDTO(repository.save(entity));
+        }
+        catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("Recurso não encontrado");
+        }
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(Long id) {
-        repository.deleteById(id);
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Recurso não encontrado");
+        }
+        else {
+            repository.deleteById(id);
+        }
     }
 
     private void passDtoToEntity(ClientDTO dto, Client entity) {
