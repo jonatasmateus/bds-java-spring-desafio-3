@@ -1,16 +1,23 @@
 package com.jonatasmateus.desafio.dto;
 
 import com.jonatasmateus.desafio.entities.Client;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
 public class ClientDTO {
 
     private Long id;
+    @Size(min = 3, max = 80, message = "Name must be between 3 and 80 characters")
+    @NotBlank(message = "Required field")
     private String name;
+    @Pattern(regexp = "\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}", message = "CPF must be in valid format")
     private String cpf;
+    @PositiveOrZero(message = "Income must be positive or zero")
     private Double income;
+    @Past(message = "Birth date must be in the past")
     private LocalDate birthDate;
+    @PositiveOrZero(message = "Number of children must be positive or zero")
     private Integer children;
 
     public ClientDTO() {
