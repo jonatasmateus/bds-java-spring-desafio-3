@@ -20,7 +20,7 @@ public class ClientService {
         return new ClientDTO(repository.findById(id).get());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<ClientDTO> findAll(Pageable pageable) {
         Page<Client> result = repository.findAll(pageable);
         return result.map(ClientDTO::new);
